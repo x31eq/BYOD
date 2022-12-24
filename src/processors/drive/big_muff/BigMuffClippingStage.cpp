@@ -11,8 +11,11 @@ constexpr float G17 = 1.0f / 470.0e3f;
 
 // diode constants
 constexpr float Vt = 25.85e-3f;
+/* roughly 10% tolerance in diode */
+constexpr float Vt_tol = 25.0e-3f;
 constexpr float twoIs = 2.0f * 2.52e-9f;
 constexpr float twoIs_over_Vt = twoIs / Vt;
+constexpr float twoIs_over_Vt_tol = twoIs / Vt_tol;
 
 constexpr float A = -10000.0f / 150.0f; // BJT Common-Emitter amp gain
 constexpr float VbiasA = 0.7f; // bias point after input filter
@@ -38,13 +41,15 @@ inline auto sinh_cosh (float x) noexcept
 template <int numIters>
 inline float newton_raphson (float x, float y, float C_12_state, float G_C_12) noexcept
 {
+    auto Vt_eff = x > 0? Vt: Vt_tol;
+    auto twoIs_over_Vt_eff = x > 0? twoIs_over_Vt: twoIs_over_Vt_tol;
     for (int k = 0; k < numIters; ++k)
     {
         auto v_drop = y - VbiasA;
 
-        auto [sinh_v, cosh_v] = sinh_cosh (v_drop / Vt);
+        auto [sinh_v, cosh_v] = sinh_cosh (v_drop / Vt_eff);
         auto i_diodes = twoIs * sinh_v;
-        auto di_diodes = twoIs_over_Vt * cosh_v;
+        auto di_diodes = twoIs_over_Vt_eff * cosh_v;
 
         auto i_R17 = v_drop * G17;
         auto i_C12 = v_drop * G_C_12 - C_12_state;
