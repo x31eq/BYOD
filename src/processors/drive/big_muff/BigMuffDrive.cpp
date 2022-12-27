@@ -46,7 +46,7 @@ ParamLayout BigMuffDrive::createParameterLayout()
 
     emplace_param<AudioParameterChoice> (params, "n_stages", "", StringArray { "1 Stage", "2 Stages", "3 Stages", "4 Stages" }, 1);
     emplace_param<AudioParameterBool> (params, "high_q", "High Quality", false);
-    emplace_param<AudioParameterBool> (params, "tolerance", "Realistic Tolerance", false);
+    emplace_param<AudioParameterChoice> (params, "tolerance", "Tolerance", StringArray { "Perfect", "Realistic", "Sloppy"}, 0);
 
     return { params.begin(), params.end() };
 }
@@ -165,16 +165,16 @@ void BigMuffDrive::processAudio (AudioBuffer<float>& buffer)
 
     smoothingParam.process (numSamples);
     const auto useHighQualityMode = hiQParam->load() == 1.0f;
-    const auto useTolerance = toleranceParam->load() == 1.0f;
+    const auto toleranceIndex = (int) *toleranceParam;
     if (useHighQualityMode)
     {
         for (int i = 0; i < numStages; ++i)
-            stages[i].processBlock<true> (buffer, smoothingParam, useTolerance);
+            stages[i].processBlock<true> (buffer, smoothingParam, toleranceIndex);
     }
     else
     {
         for (int i = 0; i < numStages; ++i)
-            stages[i].processBlock<false> (buffer, smoothingParam, useTolerance);
+            stages[i].processBlock<false> (buffer, smoothingParam, toleranceIndex);
     }
 
     for (int ch = 0; ch < numChannels; ++ch)
