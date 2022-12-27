@@ -22,8 +22,10 @@ BigMuffDrive::BigMuffDrive (UndoManager* um) : BaseProcessor ("Muff Drive", crea
     smoothingParam.setParameterHandle (getParameterPointer<chowdsp::FloatParameter*> (vts, "smoothing"));
     nStagesParam = vts.getRawParameterValue ("n_stages");
     hiQParam = vts.getRawParameterValue ("high_q");
+    toleranceParam = vts.getRawParameterValue ("tolerance");
 
     addPopupMenuParameter ("high_q");
+    addPopupMenuParameter ("tolerance");
 
     uiOptions.backgroundColour = Colours::darkgrey.brighter (0.3f).withRotatedHue (0.2f);
     uiOptions.powerColour = Colours::red.brighter (0.15f);
@@ -44,6 +46,7 @@ ParamLayout BigMuffDrive::createParameterLayout()
 
     emplace_param<AudioParameterChoice> (params, "n_stages", "", StringArray { "1 Stage", "2 Stages", "3 Stages", "4 Stages" }, 1);
     emplace_param<AudioParameterBool> (params, "high_q", "High Quality", false);
+    emplace_param<AudioParameterBool> (params, "tolerance", "Realistic Tolerance", false);
 
     return { params.begin(), params.end() };
 }
@@ -162,15 +165,16 @@ void BigMuffDrive::processAudio (AudioBuffer<float>& buffer)
 
     smoothingParam.process (numSamples);
     const auto useHighQualityMode = hiQParam->load() == 1.0f;
+    const auto useTolerance = toleranceParam->load() == 1.0f;
     if (useHighQualityMode)
     {
         for (int i = 0; i < numStages; ++i)
-            stages[i].processBlock<true> (buffer, smoothingParam);
+            stages[i].processBlock<true, useTolerance> (buffer, smoothingParam);
     }
     else
     {
         for (int i = 0; i < numStages; ++i)
-            stages[i].processBlock<false> (buffer, smoothingParam);
+            stages[i].processBlock<false, useTolerance> (buffer, smoothingParam);
     }
 
     for (int ch = 0; ch < numChannels; ++ch)
