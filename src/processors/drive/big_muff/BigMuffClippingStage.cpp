@@ -12,7 +12,7 @@ constexpr float G17 = 1.0f / 470.0e3f;
 // diode constants
 constexpr float Vt = 25.85e-3f;
 /* roughly 10% tolerance in diode */
-constexpr float Vt_tol = 25.0e-3f;
+constexpr float Vt_tol = 23.3e-3f;
 constexpr float twoIs = 2.0f * 2.52e-9f;
 constexpr float twoIs_over_Vt = twoIs / Vt;
 
