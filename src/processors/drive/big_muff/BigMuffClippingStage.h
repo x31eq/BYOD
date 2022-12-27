@@ -10,8 +10,8 @@ public:
     void prepare (double sampleRate);
     void reset();
 
-    template <bool highQuality, bool tolerant>
-    void processBlock (AudioBuffer<float>& buffer, const chowdsp::SmoothedBufferValue<float>& gc12Smoothed) noexcept;
+    template <bool highQuality>
+    void processBlock (AudioBuffer<float>& buffer, const chowdsp::SmoothedBufferValue<float>& gc12Smoothed, bool tolerant) noexcept;
 
     static float getGC12 (float fs, float smoothing);
 

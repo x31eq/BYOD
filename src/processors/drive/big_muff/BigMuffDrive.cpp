@@ -169,12 +169,12 @@ void BigMuffDrive::processAudio (AudioBuffer<float>& buffer)
     if (useHighQualityMode)
     {
         for (int i = 0; i < numStages; ++i)
-            stages[i].processBlock<true, useTolerance> (buffer, smoothingParam);
+            stages[i].processBlock<true> (buffer, smoothingParam, useTolerance);
     }
     else
     {
         for (int i = 0; i < numStages; ++i)
-            stages[i].processBlock<false, useTolerance> (buffer, smoothingParam);
+            stages[i].processBlock<false> (buffer, smoothingParam, useTolerance);
     }
 
     for (int ch = 0; ch < numChannels; ++ch)

@@ -24,6 +24,7 @@ private:
     chowdsp::SmoothedBufferValue<float> smoothingParam;
     std::atomic<float>* nStagesParam = nullptr;
     std::atomic<float>* hiQParam = nullptr;
+    std::atomic<float>* toleranceParam = nullptr;
 
     chowdsp::FirstOrderLPF<float> inputFilter[2];
     SmoothedValue<float, ValueSmoothingTypes::Multiplicative> cutoffSmooth;

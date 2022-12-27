@@ -52,8 +52,8 @@ inline auto sinh_cosh_asym (float x1, float x2) noexcept
     return std::make_pair (sinh, cosh);
 }
 
-template <int numIters, bool tolerant>
-inline float newton_raphson (float x, float y, float C_12_state, float G_C_12) noexcept
+template <int numIters>
+inline float newton_raphson (float x, float y, float C_12_state, float G_C_12, bool tolerant) noexcept
 {
     for (int k = 0; k < numIters; ++k)
     {
@@ -110,19 +110,19 @@ float BigMuffClippingStage::getGC12 (float fs, float smoothing)
     return 2.0f * (C12 + smoothing * 200.0e-12f) * fs;
 }
 
-template <bool highQuality, bool tolerant>
-void BigMuffClippingStage::processBlock (AudioBuffer<float>& buffer, const chowdsp::SmoothedBufferValue<float>& gc12Smoothed) noexcept
+template <bool highQuality>
+void BigMuffClippingStage::processBlock (AudioBuffer<float>& buffer, const chowdsp::SmoothedBufferValue<float>& gc12Smoothed, bool tolerant) noexcept
 {
     const auto numChannels = buffer.getNumChannels();
     const auto numSamples = buffer.getNumSamples();
 
-    const auto processSample = [this] (int ch, float x, float G_C_12)
+    const auto processSample = [this] (int ch, float x, float G_C_12, bool tolerant)
     {
         // input filter
         auto u_n = inputFilter[ch].processSample (x);
 
         // newton-raphson
-        float y_k = newton_raphson<(highQuality ? 8 : 4), tolerant> (u_n, y_1[ch], C_12_1[ch], G_C_12);
+        float y_k = newton_raphson<(highQuality ? 8 : 4)> (u_n, y_1[ch], C_12_1[ch], G_C_12, tolerant);
 
         // update state
         C_12_1[ch] = 2.0f * (y_k - VbiasA) * G_C_12 - C_12_1[ch];
@@ -139,16 +139,16 @@ void BigMuffClippingStage::processBlock (AudioBuffer<float>& buffer, const chowd
         {
             const auto G_C_12_data = gc12Smoothed.getSmoothedBuffer();
             for (int n = 0; n < numSamples; ++n)
-                x[n] = processSample (ch, x[n], G_C_12_data[n]);
+                x[n] = processSample (ch, x[n], G_C_12_data[n], tolerant);
         }
         else
         {
             const auto G_C_12 = gc12Smoothed.getCurrentValue();
             for (int n = 0; n < numSamples; ++n)
-                x[n] = processSample (ch, x[n], G_C_12);
+                x[n] = processSample (ch, x[n], G_C_12, tolerant);
         }
     }
 }
 
-template void BigMuffClippingStage::processBlock<true> (AudioBuffer<float>&, const chowdsp::SmoothedBufferValue<float>&) noexcept;
-template void BigMuffClippingStage::processBlock<false> (AudioBuffer<float>&, const chowdsp::SmoothedBufferValue<float>&) noexcept;
+template void BigMuffClippingStage::processBlock<true> (AudioBuffer<float>&, const chowdsp::SmoothedBufferValue<float>&, bool tolerant) noexcept;
+template void BigMuffClippingStage::processBlock<false> (AudioBuffer<float>&, const chowdsp::SmoothedBufferValue<float>&, bool tolerant) noexcept;
