@@ -39,7 +39,7 @@ inline auto sinh_cosh (float x) noexcept
 
 inline auto sinh_cosh_asym (float x1, float x2) noexcept
 {
-    // likc sinh_cosh but B and Br are not the same exp to
+    // like sinh_cosh but B and Br are not the same exp to
     // allow for engineering tolerance in the diodes
 
     auto B = std::exp (x1);
@@ -47,7 +47,9 @@ inline auto sinh_cosh_asym (float x1, float x2) noexcept
     B *= 0.5f;
 
     auto sinh = B - Br;
-    auto cosh = B + Br;
+    // cosh is pragmatically defined as the derivative of sinh
+    // consistent with x1 being the expected multiplier
+    auto cosh = B + Br * x2 / x1;
 
     return std::make_pair (sinh, cosh);
 }
