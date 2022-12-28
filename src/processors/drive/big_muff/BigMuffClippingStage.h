@@ -11,7 +11,7 @@ public:
     void reset();
 
     template <bool highQuality>
-    void processBlock (AudioBuffer<float>& buffer, const chowdsp::SmoothedBufferValue<float>& gc12Smoothed, int toleranceIndex) noexcept;
+    void processBlock (AudioBuffer<float>& buffer, const chowdsp::SmoothedBufferValue<float>& gc12Smoothed, bool tolerant) noexcept;
 
     static float getGC12 (float fs, float smoothing);
 
